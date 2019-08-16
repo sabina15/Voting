@@ -1,0 +1,116 @@
+<%- include('header', {title: "Voter Info"});  -%>
+<script type="text/javascript" src="../plugins/QrCode/jquery.qrcode.min.js"></script>
+<script type="text/javascript" src="../plugins/printElement/printThis.js"></script>
+    </head>
+
+    <body>
+        <div class="row">
+            <div class="col">
+                <!-- Navbar -->
+                <%- include('voterNavbar');  -%>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <div class="container">
+                    <h4>Name:
+                        <%= voter.fullName %>
+                    </h4>
+                    <h5>Form No:
+                        <%= voter.formNo %>
+                    </h5>
+                    <h5>Date of Birth:
+                        <%= voter.DOB %>
+                    </h5>
+                    <h5>Sex:
+                        <%= voter.sex %>
+                    </h5>
+                    
+                    <h5>Roll No:
+                        <%= voter.rollNo %>
+                    </h5>
+                    <h5>Batch:
+                        <%= voter.batch %>
+                    </h5>
+                    <h5>Account Address:
+                        <%= voter.ethAddress %>
+                    </h5>
+
+                    <h5>pkHash:
+                        <%= voter.pkHash %>
+                    </h5>
+                    
+                    <h5>Status:
+                        <% if (voter.tokenTransferred) { %>
+                            OK
+                        <% } else { %>
+                            pending...
+                        <% } %>
+                    </h5>
+                    <div id="qrcode" style="display: none;">
+                            
+                    </div>
+                    <div>
+                            <img id="qrImage"></img>
+                    </div>
+                    
+        
+                    <button id="printQr" class="btn btn-success" style="display: none;">Print</button>
+                    <% if(pk) { %>
+                        <script>
+
+                            
+                            $("#qrcode").qrcode('{"pk":"<%= pk %>"}');
+                            console.log('Encripted PK after register:<%= pk %>');
+                            var canvas = $("#qrcode canvas");
+                            var data = {
+                                pk: $("#qrcode").html()
+                            }
+                            console.log(canvas);
+                            var image = canvas[0].toDataURL('image/png');
+                            console.log(image)
+                            $("#qrImage").attr('src', image);
+                            $("#printQr").show();
+                            $("#printQr").on('click', function(event) {
+                                $("#qrImage").printThis();
+                            });
+                        </script>
+                    <% } %>
+                        
+                </div>
+                <div class="col-md-2"></div>
+            </div>
+        </div>
+
+        <script>
+            $(function () {
+                const toast = swal.mixin({
+                    toast: true,
+                    position: 'bottom-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+
+                $.ajax({
+                    method: "GET",
+                    url: "/notification",
+                    success: function (response) {
+                        console.log(response);
+                        if (response.toNotify) {
+                            toast({
+                                type: response.type,
+                                title: response.message
+                            });
+                            $.ajax({
+                                method: "GET",
+                                url: '/clearNotification'
+                            });
+                        }
+
+                    }
+                });
+            });
+        </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2"></script>
+        

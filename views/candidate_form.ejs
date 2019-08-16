@@ -1,0 +1,166 @@
+<div class="container form-container">
+    <form class="form-horizontal" data-toggle="validator" id="candidate-form" method="post" action="/candidate/save"  enctype="multipart/form-data">
+      <fieldset>
+  
+        <!-- Form Name -->
+        <legend>Candidate Registration</legend>
+  
+
+  
+
+
+        
+
+             
+
+
+          <div class="form-row">
+
+              <!-- Text input-->
+              <div class="form-group col-md-6">
+                  <label class="col-md-12 control-label" for="candidateName_eng">Full Name</label>
+                  <div class="col-md-12">
+                    <input id="candidateName" name="candidateName" placeholder="Enter Full Name" class="form-control input-md" required="" type="text">
+                    <div class="help-block with-errors"></div>
+                  </div>
+                </div>
+
+                <div class="form-group col-md-6">
+                  <label class="col-md-12 control-label" for="batch">Batch</label>
+                  <div class="col-md-12">
+                    <select id="batch" name="batch" class="form-control">
+                      <option value="2019">2019</option>
+                      <option value="2019">2018</option>
+                      <option value="2019">2017</option>
+                      <option value="2019">2016</option>
+                      
+                    </select>
+                  </div>
+                </div>
+
+                
+              
+    
+              
+      
+              
+            </div>
+  
+  
+
+
+        
+
+  
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label class="col-md-12 control-label" for="rollNo">Roll No.</label>
+            <div class="col-md-12">
+              <input id="rollNo" name="rollNo" placeholder="Enter Roll Number" class="form-control input-md" type="text">
+              <div class="help-block with-errors"></div>
+  
+            </div>
+          </div>
+  
+  
+          
+
+          
+            
+
+            
+              
+      
+      
+            
+  
+        
+        <!-- Button -->
+        <div class="form-group">
+          <label class="col-md-12 control-label" for="submit"></label>
+          <div class="col-md-12">
+            <button id="submitButton" type="submit" name="submit" class="btn btn-primary">Register</button>
+          </div>
+        </div>
+  
+      </fieldset>
+    </form>
+  </div>
+  
+  
+  <style>
+    .with-errors {
+      height: 20px;
+      font-size: 90%;
+      color: red;
+    }
+  
+    .form-container {
+      padding: 8%;
+      background-color: #F1F7FC;
+    }
+  
+    #candidate-form {
+      background-color: white;
+      padding: 5%;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
+  
+  
+  
+  <script>
+    $(function () {
+      var query = window.location.search;
+      const toast = swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        showConfirmButton: false,
+        timer: 3000
+      });
+      if (query) {
+        var loadingPopup = function () {
+          swal({
+            text: "loading...",
+            onOpen: function () {
+              swal.showLoading();
+            },
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false
+          });
+        }
+        var loadingPopdown = function () {
+          swal.close();
+        }
+        $.ajax({
+          method: "GET",
+          url: "http://localhost:8001/api/candidate_api" + query,
+          beforeSend: function () {
+            loadingPopup();
+          },
+          success: function (doc) {
+            loadingPopdown();
+            $("#candidateName").val(doc.candidateName);
+            $("#rollNo").val(doc.rollNo);
+            $("#batch").val(doc.batch);            
+            
+            $("#submitButton").html("Update");
+            $("#candidate-form").attr('method', 'post');
+            $("#candidate-form").attr('action', '/candidate/fptp_candidate/'+ doc._id);
+            
+          },
+          error: function (error) {
+            loadingPopdown();
+            toast({
+              type: "error",
+              title: "Error! Try again later"
+            });
+          }
+        });
+      }
+      
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2"></script>

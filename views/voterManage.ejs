@@ -1,0 +1,141 @@
+<%- include('header', {title: "Voter Management"});  -%>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
+        crossorigin="anonymous">
+
+    </head>
+
+    <body>
+        <%- include('voterNavbar'); -%>
+            <div class="container">
+                <table id="voterTable" data-toggle="table" data-pagination="true" data-search="true" data-page-size="10" data-side-pagination="client" data-url="http://localhost:8001/api/voter">
+                    <thead>
+                        <tr>
+                            <th data-field="formNo">Form No</th>
+                            <th data-field="fullName">Name</th>
+                            <th data-field="sex">Sex</th>
+                            <th data-field="DOB">D.O.B.</th>
+                            <th data-field="rollNo">Roll No</th>
+                            <th data-field="batch">Batch</th>
+                            <th data-field="_id" data-formatter="modifyFormatter">Modify</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+
+            <%- include('footer'); -%>
+                <script>
+                    function modifyFormatter(value, row, index, field) {
+                        var button_delete = `<button class="btn btn-danger delete-button" name="${value}" style="margin:0px 10px 0px 10px"><i class="fa fa-trash"></i></button>`;
+                        var edit_button = `<button class="btn btn-success edit-button" name="${value}" style="margin:0px 10px 0px 10px"><i class="fa fa-edit"></i></button>`
+                        return edit_button + button_delete;
+                    }
+                    $(function () {
+                        const toast = swal.mixin({
+                            toast: true,
+                            position: 'bottom-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+
+                        $.ajax({
+                            method: "GET",
+                            url: "/notification",
+                            success: function (response) {
+                                console.log(response);
+                                if (response.toNotify) {
+                                    toast({
+                                        type: response.type,
+                                        title: response.message
+                                    });
+                                    $.ajax({
+                                        method: "GET",
+                                        url: '/clearNotification'
+                                    });
+                                }
+
+                            }
+                        });
+                        $('body').on('click', '.edit-button', function (event) {
+                            swal.fire({
+                                title: "Proceed to Update?",
+                                type: "info"
+                            })
+                                .then((willupdate) => {
+                                    if (willupdate.value) {
+                                        console.log(event.target.name);
+                                        console.log(event.currentTarget.name);
+
+                                        window.location.replace('/voter/update?id=' + event.currentTarget.name);
+                                    }
+                                })
+                        });
+
+                        $('body').on('click', '.delete-button', function (event) {
+                           
+                            swal.fire({
+                                title: "Are you sure to delete?",
+                                text: "Once deleted, you won't be able to recover Account",
+                                type: "warning"
+                            }).then((willDelete) => {
+                                    console.log(willDelete);
+                                    console.log("Delele okay:",event.currentTarget.name);
+
+                                    if (willDelete.value) {
+                                        $.ajax({
+                                            url: "http://localhost:8001/api/voter",
+                                            method: "DELETE",
+                                            data: { "id": event.currentTarget.name },
+                                            beforeSend: function () {
+                                                swal.fire({
+                                                    text: "loading...",
+                                                    onOpen: function () {
+                                                        swal.showLoading();
+                                                    },
+                                                    allowOutsideClick: false,
+                                                    allowEscapeKey: false,
+                                                    showConfirmButton: false
+                                                });
+                                            },
+                                            success: function (response) {
+                                                swal.close();
+                                                console.log("API ajax successful")
+                                                $("#voterTable").bootstrapTable('refresh', true);
+                                                // toast({
+                                                //     type: "success",
+                                                //     title: "User deleted successfully"
+                                                // });
+                                                console.log(response);
+                                            },
+                                            error: function (error) {
+                                                swal.close();
+                                                console.log("ajax Api failed");
+                                                // toast({
+                                                //     type: "error",
+                                                //     title: "Error! Try again later"
+                                                // });
+                                                console.log(error);
+                                            }
+                                        });
+
+                                    }
+                                });
+                        });
+
+                        $("#voterTable").on('click-cell.bs.table', function(field, value, row, element) {
+                            if(value != '_id'){
+                                window.location.href = '/voter?id='+element._id;                                
+                            }
+                        });
+
+                    });
+                </script>
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+                <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2"></script> -->
+                <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.js"></script>
+                <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/locale/bootstrap-table-en-US.min.js"></script>
+
+
+    </body>
+
+    </html>
